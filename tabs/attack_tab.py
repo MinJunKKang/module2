@@ -1,9 +1,33 @@
 import streamlit as st
 from components import fake_terminal, section_header, vuln_box, done_hint
-from config import R1, R2, R3, R4, SERVER_B_IP
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from config import R1, R2, R3, R4, SERVER_B_IP, VIDEOS
+
+
+def to_embed_url(url):
+    """youtu.be 또는 youtube.com 링크를 embed URL로 변환"""
+    if "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+    elif "v=" in url:
+        video_id = url.split("v=")[1].split("&")[0]
+    else:
+        return None
+    return f"https://www.youtube.com/embed/{video_id}"
+
+
+def video_player(key):
+    """유튜브 링크 있으면 components iframe으로 재생, 없으면 안내 메시지"""
+    url = VIDEOS.get(key, "")
+    if url:
+        embed = to_embed_url(url)
+        st.components.v1.iframe(embed, height=400)
+    else:
+        st.markdown("""
+<div style="background:#f8fafc;border:2px dashed #e2e8f0;border-radius:8px;
+     padding:20px;text-align:center;color:#94a3b8;font-size:13px;">
+    🎬 영상 준비 중 — config.py의 VIDEOS에 유튜브 링크를 넣어주세요
+</div>
+""", unsafe_allow_html=True)
+
 
 def render():
     st.markdown("""<div style="color:#dc2626;font-size:13px;font-weight:700;
@@ -13,6 +37,10 @@ def render():
 
     # STAGE 01
     with st.expander("  [ STAGE 01 ]  웹쉘 업로드 — T1190 Exploit Public-Facing Application", expanded=True):
+        section_header("📹 교육 영상")
+        video_player("s1")
+        st.markdown("")
+
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("MISSION BRIEF")
@@ -33,11 +61,11 @@ def render():
 
 **📌 실습 순서:**
 ```
-whoami       ← 현재 실행 권한 확인
-id           ← UID/GID 확인
-ls -la       ← 업로드 폴더 목록
+whoami        ← 현재 실행 권한 확인
+id            ← UID/GID 확인
+ls -la        ← 업로드 폴더 목록
 cat shell.php ← 웹쉘 코드 확인
-uname -a     ← 서버 OS 정보
+uname -a      ← 서버 OS 정보
 ```
 """)
             vuln_box([
@@ -56,6 +84,10 @@ uname -a     ← 서버 OS 정보
 
     # STAGE 02
     with st.expander("  [ STAGE 02 ]  계정정보 탈취 — T1552 Unsecured Credentials"):
+        section_header("📹 교육 영상")
+        video_player("s2")
+        st.markdown("")
+
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("MISSION BRIEF")
@@ -90,7 +122,11 @@ ServerB의 IP / USER / PASS를 메모하세요.
                 st.success("STAGE 02 CLEAR — 계정정보 탈취 성공")
 
     # STAGE 03
-    with st.expander(f"  [ STAGE 03 ]  Lateral Movement — T1021 Remote Services (SSH)"):
+    with st.expander("  [ STAGE 03 ]  Lateral Movement — T1021 Remote Services (SSH)"):
+        section_header("📹 교육 영상")
+        video_player("s3")
+        st.markdown("")
+
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("MISSION BRIEF")
@@ -129,6 +165,10 @@ ssh dbadmin@{SERVER_B_IP}
 
     # STAGE 04
     with st.expander("  [ STAGE 04 ]  DB 데이터 탈취 — T1005 Data from Local System"):
+        section_header("📹 교육 영상")
+        video_player("s4")
+        st.markdown("")
+
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("MISSION BRIEF")

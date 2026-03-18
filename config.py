@@ -1,21 +1,21 @@
-import os
-from dotenv import load_dotenv
+SERVER_A_IP = "192.0.2.10"
+SERVER_B_IP = "192.0.2.20"
 
-# .env 파일 로드
-load_dotenv()
-
-SERVER_A_IP = os.getenv("SERVER_A_IP", "127.0.0.1")
-SERVER_B_IP = os.getenv("SERVER_B_IP", "127.0.0.1")
-SERVER_A_PRIVATE_IP = os.getenv("SERVER_A_PRIVATE_IP", "127.0.0.1")
+VIDEOS = {
+    "s1": "https://youtu.be/kOk0nULr1ew",  # STAGE 01 웹쉘 업로드
+    "s2": "https://youtu.be/D9_gGmfneww",  # STAGE 02 계정정보 탈취
+    "s3": "https://youtu.be/0h9vloUIbgM",  # STAGE 03 Lateral Movement
+    "s4": "https://youtu.be/0elGA3ElpfY",  # STAGE 04 DB 탈취
+}
 
 MISSIONS = [
-    ("1단계: 웹쉘 업로드", "T1190", "attack"),
-    ("2단계: 계정정보 탈취", "T1552", "attack"),
+    ("1단계: 웹쉘 업로드",       "T1190", "attack"),
+    ("2단계: 계정정보 탈취",      "T1552", "attack"),
     ("3단계: Lateral Movement", "T1021", "attack"),
-    ("4단계: DB 탈취", "T1005", "attack"),
-    ("방어1: 계정정보 암호화", "DEFEND", "defense"),
-    ("방어2: 웹쉘 탐지", "DEFEND", "defense"),
-    ("방어3: DB 암호화", "DEFEND", "defense"),
+    ("4단계: DB 탈취",           "T1005", "attack"),
+    ("방어1: 계정정보 암호화",    "DEFEND", "defense"),
+    ("방어2: 웹쉘 탐지",         "DEFEND", "defense"),
+    ("방어3: DB 암호화",         "DEFEND", "defense"),
 ]
 
 R1 = {
@@ -29,7 +29,7 @@ R1 = {
     "hostname": "ServerA",
     "ifconfig": f"eth0: flags=4163  mtu 9001\n      inet {SERVER_A_IP}  netmask 255.255.255.0",
     "ps aux": "USER       PID %CPU %MEM COMMAND\nroot         1  0.0  0.1 /sbin/init\nwww-data   312  0.0  0.3 apache2\nwww-data   841  0.0  0.1 sh -c whoami",
-    "env": "APACHE_RUN_USER=www-data\nAPACHE_LOG_DIR=/var/log/apache2\nSERVER_ADDR={SERVER_A_PRIVATE_IP}",
+    "env": "APACHE_RUN_USER=www-data\nAPACHE_LOG_DIR=/var/log/apache2\nSERVER_ADDR=10.0.1.27",
 }
 
 R2 = {
