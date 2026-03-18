@@ -1,7 +1,6 @@
 import streamlit as st
 from components import fake_terminal, section_header, defense_box
 from config import RD1, RD3
-from llm.webshell_detector import detect_webshell
 
 
 def render():
@@ -27,16 +26,9 @@ def render():
 
 **📌 실습 순서:**
 ```bash
-# 현재 파일 목록 확인
 ls /var/www/html/dvwa/config/
-
-# AES-256 암호화
 sudo openssl enc -aes-256-cbc -pbkdf2 -in /var/www/html/dvwa/config/server_info.txt -out /var/www/html/dvwa/config/server_info.enc -k secretkey123
-
-# 원본 삭제
 sudo rm /var/www/html/dvwa/config/server_info.txt
-
-# 암호화 결과 확인
 cat /var/www/html/dvwa/config/server_info.enc
 ```
 """)
@@ -83,25 +75,12 @@ LLM은 코드 **의미**를 이해하므로 난독화 여부와
 <?php echo "Hello, World!"; ?>
 ```
 """)
-            st.markdown("")
             uploaded_file = st.file_uploader("📎 PHP 파일 업로드", type=["php"], label_visibility="collapsed")
             if uploaded_file:
                 code = uploaded_file.read().decode("utf-8")
                 st.code(code, language="php")
                 if st.button("🤖  LLM 분석 실행", use_container_width=True):
-                    with st.spinner("GPT-4o-mini 분석 중..."):
-                        try:
-                            result = detect_webshell(code)
-                            if result["웹쉘여부"] == "악성":
-                                st.error(f"🚨 **악성 탐지** — 위험도: {result['위험도점수']}/100")
-                            else:
-                                st.success(f"✅ **정상 파일** — 위험도: {result['위험도점수']}/100")
-                            st.markdown(f"**분석:** {result['위험이유']}")
-                            for r in result.get("탐지근거", []):
-                                st.markdown(f"- {r}")
-                            st.session_state.completed["방어2: 웹쉘 탐지"] = True
-                        except Exception as e:
-                            st.error(f"분석 오류: {e}")
+                    st.info("🔧 LLM 분석 기능은 준비 중입니다.")
         with c2:
             section_header("탐지 방법 비교", "#2563eb")
             st.markdown("""
@@ -148,14 +127,8 @@ Ki값을 MySQL `AES_ENCRYPT`로 암호화 저장.
 **📌 실습 순서:**
 ```sql
 mysql -u dbadmin -p1234 simdb
-
--- 암호화 전 확인
 SELECT * FROM usim LIMIT 3;
-
--- Ki값 AES 암호화
 UPDATE usim SET Ki = HEX(AES_ENCRYPT(Ki, 'supersecretkey'));
-
--- 암호화 후 확인
 SELECT * FROM usim;
 ```
 """)
