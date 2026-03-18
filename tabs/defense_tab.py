@@ -4,7 +4,7 @@ from components import fake_terminal, section_header, defense_box
 from config import RD1, RD3
 
 # ============================
-# 웹쉘 탐지 규칙
+# 웹쉘 탐지 규칙 (LLM 없이)
 # ============================
 WEBSHELL_RULES = [
     {
@@ -212,10 +212,9 @@ cat /var/www/html/dvwa/config/server_info.enc
 </div>
 """, unsafe_allow_html=True)
 
-                if result["판정"] == "악성":
+                if st.button("✅  DEF 02 완료", key="btn6", use_container_width=True):
                     st.session_state.completed["방어2: 웹쉘 탐지"] = True
-                    if st.button("✅  DEF 02 완료", key="btn6", use_container_width=True):
-                        st.success("DEF 02 CLEAR — 웹쉘 탐지 성공")
+                    st.success("DEF 02 CLEAR — 웹쉘 탐지 성공")
             else:
                 st.markdown("""
 <div style="background:#f8fafc;border:2px dashed #e2e8f0;border-radius:8px;
