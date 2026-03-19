@@ -8,6 +8,12 @@ VIDEOS = {
     "s4": "https://youtu.be/0elGA3ElpfY",  # STAGE 04 DB 탈취
 }
 
+DEFENSE_VIDEOS = {
+    "d1": "https://youtu.be/o2WfdAzS70M",  # DEF 01 계정정보 암호화
+    "d2": "https://youtu.be/0MXZS6ZkuvM",  # DEF 02 웹쉘 탐지
+    "d3": "https://youtu.be/lT6kIX8t3IA",  # DEF 03 DB 암호화
+}
+
 MISSIONS = [
     ("1단계: 웹쉘 업로드",       "T1190", "attack"),
     ("2단계: 계정정보 탈취",      "T1552", "attack"),
