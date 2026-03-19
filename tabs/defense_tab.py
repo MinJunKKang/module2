@@ -1,7 +1,31 @@
 import re
 import streamlit as st
 from components import fake_terminal, section_header, defense_box
-from config import RD1, RD3
+from config import RD1, RD3, DEFENSE_VIDEOS
+
+
+def to_embed_url(url):
+    if "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+    elif "v=" in url:
+        video_id = url.split("v=")[1].split("&")[0]
+    else:
+        return None
+    return f"https://www.youtube.com/embed/{video_id}"
+
+
+def video_player(key):
+    url = DEFENSE_VIDEOS.get(key, "")
+    if url:
+        embed = to_embed_url(url)
+        st.components.v1.iframe(embed, height=400)
+    else:
+        st.markdown('''
+<div style="background:#f8fafc;border:2px dashed #e2e8f0;border-radius:8px;
+     padding:20px;text-align:center;color:#94a3b8;font-size:13px;">
+    🎬 영상 준비 중 — config.py의 DEFENSE_VIDEOS에 유튜브 링크를 넣어주세요
+</div>
+''', unsafe_allow_html=True)
 
 # ============================
 # 웹쉘 탐지 규칙 (LLM 없이)
@@ -106,6 +130,9 @@ def render():
 
     # DEF 01
     with st.expander("  [ DEF 01 ]  계정정보 암호화 — Credential Encryption at Rest", expanded=True):
+        section_header("📹 교육 영상", "#00cfff")
+        video_player("d1")
+        st.markdown("")
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("DEFENSE BRIEF", "#00cfff")
@@ -141,6 +168,9 @@ cat /var/www/html/dvwa/config/server_info.enc
 
     # DEF 02
     with st.expander("  [ DEF 02 ]  웹쉘 탐지 — Rule-based Webshell Detection"):
+        section_header("📹 교육 영상", "#00cfff")
+        video_player("d2")
+        st.markdown("")
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("DEFENSE BRIEF", "#00cfff")
@@ -255,6 +285,9 @@ cat /var/www/html/dvwa/config/server_info.enc
 
     # DEF 03
     with st.expander("  [ DEF 03 ]  DB 암호화 — AES Encryption at Rest"):
+        section_header("📹 교육 영상", "#00cfff")
+        video_player("d3")
+        st.markdown("")
         c1, c2 = st.columns([1, 1], gap="large")
         with c1:
             section_header("DEFENSE BRIEF", "#00cfff")
