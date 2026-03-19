@@ -3,14 +3,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 from config import MISSIONS
 
-from llm.mitre_pipeline import (
-    INTRO_TEXT,
-    MITRE_EASY_TEXT,
-    WHY_MAPPING_TEXT,
-    build_report_data,
-    build_candidate_mapping_html,
-    build_mitre_summary_html,
-)
 
 from llm.threat_modeling_pipeline import (
     THREAT_MODELING_TEXT,
@@ -33,13 +25,6 @@ from llm.evidence_panels import (
     render_dread_evidence,
     render_security_evidence,
 )
-
-
-def get_completed_attack_count(missions, completed_state):
-    return sum(
-        1 for name, _, mission_type in missions
-        if mission_type == "attack" and completed_state[name]
-    )
 
 
 def estimate_table_height(row_count: int, base: int = 64, row_px: int = 44, max_height: int = 1400) -> int:
@@ -154,120 +139,6 @@ def render_html_table(
     """)
 
     components.html(html_block, height=height, scrolling=False)
-
-
-def render_report_header():
-    st.markdown(
-        """
-<div style="color:#2563eb;font-size:13px;font-weight:700;letter-spacing:2px;padding:14px 0 6px 0;">
-📊 INCIDENT ANALYSIS REPORT — MITRE ATT&CK + THREAT MODELING
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-
-
-def render_intro_section():
-    st.markdown("### 🧾 분석 리포트")
-    st.markdown(INTRO_TEXT.strip())
-
-
-def render_mitre_explainer():
-    st.markdown("### 🎯 MITRE ATT&CK란?")
-    st.markdown(MITRE_EASY_TEXT.strip())
-
-    st.markdown("### ✅ ATT&CK 매핑을 하면 뭐가 좋을까?")
-    st.markdown(WHY_MAPPING_TEXT.strip())
-
-
-def render_candidate_mapping(rows):
-
-    score_guide_html = """<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, Helvetica, sans-serif; background: white; }
-.wrap { display: flex; align-items: stretch; gap: 0; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
-.col { flex: 1; padding: 14px 16px; }
-.col + .col { border-left: 1px solid #e5e7eb; }
-.col-1 { background: #eff6ff; }
-.col-2 { background: #f5f3ff; }
-.col-3 { background: #f0fdf4; }
-.col-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.step-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
-.s1 { background: #dbeafe; color: #1e40af; }
-.s2 { background: #ede9fe; color: #6d28d9; }
-.s3 { background: #dcfce7; color: #166534; }
-.col-title { font-size: 13px; font-weight: 700; color: #111827; }
-.tier-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.tier-label { font-size: 11px; color: #6b7280; width: 52px; flex-shrink: 0; }
-.tier-bar-wrap { flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
-.tier-bar { height: 100%; border-radius: 3px; }
-.tier-val { font-size: 11px; font-weight: 600; width: 44px; text-align: right; flex-shrink: 0; }
-.b1 { background: #3b82f6; }
-.b2 { background: #7c3aed; }
-.b3 { background: #16a34a; }
-.v1 { color: #1e40af; }
-.v2 { color: #6d28d9; }
-.v3 { color: #166534; }
-.col-desc { font-size: 11px; color: #6b7280; margin-top: 8px; line-height: 1.5; }
-.eq { display: flex; align-items: center; justify-content: center; font-size: 18px; color: #d1d5db; font-weight: 700; flex-shrink: 0; padding: 0 2px; align-self: center; }
-</style></head><body>
-<div class="wrap">
-  <div class="col col-1">
-    <div class="col-head">
-      <span class="step-badge s1">1차 점수</span>
-      <span class="col-title">키워드 매칭</span>
-    </div>
-    <div class="tier-row"><span class="tier-label">직접 일치</span><div class="tier-bar-wrap"><div class="tier-bar b1" style="width:100%"></div></div><span class="tier-val v1">+5~10</span></div>
-    <div class="tier-row"><span class="tier-label">부분 관련</span><div class="tier-bar-wrap"><div class="tier-bar b1" style="width:50%"></div></div><span class="tier-val v1">+2~4</span></div>
-    <div class="tier-row"><span class="tier-label">간접/보조</span><div class="tier-bar-wrap"><div class="tier-bar b1" style="width:20%"></div></div><span class="tier-val v1">+0~2</span></div>
-    <p class="col-desc">공격 시나리오 텍스트와 TTP 키워드 간 직접 연관성 평가</p>
-  </div>
-  <div class="eq">+</div>
-  <div class="col col-2">
-    <div class="col-head">
-      <span class="step-badge s2">2차 점수</span>
-      <span class="col-title">교차 검증</span>
-    </div>
-    <div class="tier-row"><span class="tier-label">명확 일치</span><div class="tier-bar-wrap"><div class="tier-bar b2" style="width:100%"></div></div><span class="tier-val v2">+2~4</span></div>
-    <div class="tier-row"><span class="tier-label">일부 일치</span><div class="tier-bar-wrap"><div class="tier-bar b2" style="width:50%"></div></div><span class="tier-val v2">+1~2</span></div>
-    <div class="tier-row"><span class="tier-label">관련성 낮음</span><div class="tier-bar-wrap"><div class="tier-bar b2" style="width:0%"></div></div><span class="tier-val v2">+0</span></div>
-    <p class="col-desc">MITRE 공식 기술 설명 텍스트 및 Enterprise 인덱스 기반 검증</p>
-  </div>
-  <div class="eq">=</div>
-  <div class="col col-3">
-    <div class="col-head">
-      <span class="step-badge s3">최종 점수</span>
-      <span class="col-title">1차 + 2차 합산</span>
-    </div>
-    <div class="tier-row"><span class="tier-label">높을수록</span><div class="tier-bar-wrap"><div class="tier-bar b3" style="width:100%"></div></div><span class="tier-val v3">대표 선정</span></div>
-    <div class="tier-row"><span class="tier-label">중간</span><div class="tier-bar-wrap"><div class="tier-bar b3" style="width:55%"></div></div><span class="tier-val v3">후보 유지</span></div>
-    <div class="tier-row"><span class="tier-label">낮을수록</span><div class="tier-bar-wrap"><div class="tier-bar b3" style="width:20%"></div></div><span class="tier-val v3">하위 순위</span></div>
-    <p class="col-desc">가장 높은 점수의 TTP를 해당 단계 대표 기법으로 선정</p>
-  </div>
-</div>
-</body></html>"""
-    components.html(score_guide_html, height=160, scrolling=False)
-
-    st.divider()
-
-    mapping_html = build_candidate_mapping_html(rows)
-    max_candidates = max((len(row["validated_ttps"]) for row in rows), default=3)
-    dynamic_height = 60 + 52 + 44 + max_candidates * 215 + 40
-    components.html(mapping_html, height=dynamic_height, scrolling=True)
-
-
-def render_mapping_section(rows):
-    st.markdown("### 🗺️ 단계별 ATT&CK 매핑")
-    st.caption(
-        "각 단계마다 여러 TTP 후보를 함께 제시하고, "
-        "1차 키워드 점수와 2차 교차검증 점수를 합산해 대표 기법을 선정합니다."
-    )
-    render_candidate_mapping(rows)
-
-    summary_html = build_mitre_summary_html(rows)
-    # 타임라인(~260) + 인사이트 3열(~190) + 연계 안내(~90) + 헤더(~70)
-    components.html(summary_html, height=530, scrolling=False)
 
 
 def render_threat_modeling_flow():
@@ -480,33 +351,76 @@ def render_security_requirements_section():
                 st.write(item["검증 방법"])
 
 
+from llm.report_generator import (
+    generate_dfd_commentary,
+    generate_stride_commentary,
+    generate_dread_commentary,
+    generate_security_req_commentary,
+)
+
+
+def _render_gpt_commentary(commentary_fn, label: str):
+    """GPT 을 spinner와 함께 렌더링하는 공통 헬퍼"""
+    with st.expander(f"💬 정리 — {label}", expanded=True):
+        with st.spinner("분석 결과에 대한 내용을 정리하고 있습니다..."):
+            text = commentary_fn()
+        st.markdown(text)
+
+
+def render_report_intro():
+    st.markdown("""
+여러분은 방금 웹쉘 업로드부터 USIM 데이터 탈취까지, 실제 침해사고와 동일한 공격 흐름을 직접 체험했습니다.
+
+이 리포트는 그 경험을 **방어자의 시각**으로 되돌아보는 분석 문서입니다.
+시스템 구조(DFD)를 바탕으로 각 공격 경로에서 발생한 위협을 유형화(STRIDE)하고,
+위험도를 점수로 평가(DREAD)한 뒤, 실제 보안 통제로 연결되는 요구사항 명세까지 정리합니다.
+
+보안 지식이 없어도 읽을 수 있도록 각 단계마다 출처·기준·근거를 함께 제공합니다.
+
+> 📌 이 리포트는 시뮬레이션 환경 기반의 교육용 분석 자료이며, 실제 SKT 내부망과는 무관합니다.
+""")
+
 def render_threat_modeling_section():
     render_threat_modeling_intro()
     st.divider()
 
     render_dfd_section()
+    _render_gpt_commentary(generate_dfd_commentary, "DFD 공격 흐름 분석")
     render_dfd_evidence()
     st.divider()
 
     render_stride_section()
+    _render_gpt_commentary(generate_stride_commentary, "STRIDE 위협 식별")
     render_stride_evidence()
     st.divider()
 
     render_dread_section()
+    _render_gpt_commentary(generate_dread_commentary, "DREAD 위험도 평가")
     render_dread_evidence()
     st.divider()
 
     render_security_requirements_section()
+    _render_gpt_commentary(generate_security_req_commentary, "보안 요구사항 명세")
     render_security_evidence()
 
 
 def render_report_tab(missions=None):
+    from config import MISSIONS
     if missions is None:
         missions = MISSIONS
 
-    render_report_header()
+    st.markdown(
+        """<div style="color:#2563eb;font-size:13px;font-weight:700;
+        letter-spacing:2px;padding:14px 0 6px 0;">
+        📊 INCIDENT ANALYSIS REPORT — STRIDE / DREAD / 보안 요구사항
+        </div>""",
+        unsafe_allow_html=True,
+    )
 
-    completed_count = get_completed_attack_count(missions, st.session_state.completed)
+    completed_count = sum(
+        1 for name, _, t in missions
+        if t == "attack" and st.session_state.completed[name]
+    )
 
     if completed_count < 4:
         st.warning(
@@ -517,20 +431,17 @@ def render_report_tab(missions=None):
 
     st.success("공격 시나리오 완료! 분석 리포트를 생성하세요.")
 
-    if st.button("🤖 분석 리포트 생성"):
-        with st.spinner("MITRE ATT&CK 및 Threat Modeling 분석 생성 중..."):
-            rows = build_report_data()
+    btn_col, _ = st.columns([1, 4])
+    with btn_col:
+        clicked = st.button("🤖 분석 리포트 생성", use_container_width=True)
 
-            render_intro_section()
-            st.divider()
+    if clicked:
+        # ── 도입부 ────────────────────────────────────────────────
+        render_report_intro()
+        st.divider()
 
-            render_mitre_explainer()
-            st.divider()
-
-            render_mapping_section(rows)
-            st.divider()
-
-            render_threat_modeling_section()
+        # ── Threat Modeling 본문 ──────────────────────────────────
+        render_threat_modeling_section()
 
 
 def render():
