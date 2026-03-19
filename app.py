@@ -1,10 +1,7 @@
 import streamlit as st
 from components import STYLES
 from config import MISSIONS, SERVER_A_IP, SERVER_B_IP
-from tabs import attack_tab, defense_tab, report_tab
-import sys
-import os
-sys.path.insert(0, os.path.dirname(__file__))
+from tabs import attack_tab, defense_tab, report_tab, home_tab
 
 st.set_page_config(
     page_title="SKT 침해사고 체험 플랫폼",
@@ -94,7 +91,10 @@ st.markdown(f"""
 # ============================
 # 탭
 # ============================
-tab1, tab2, tab3 = st.tabs(["  🗡️  공격 시나리오  ", "  🛡️  방어 시나리오  ", "  📊  분석 리포트  "])
+tab0, tab1, tab2, tab3 = st.tabs(["  🏠  사건 개요  ", "  🗡️  공격 시나리오  ", "  🛡️  방어 시나리오  ", "  📊  분석 리포트  "])
+
+with tab0:
+    home_tab.render()
 
 with tab1:
     attack_tab.render()
