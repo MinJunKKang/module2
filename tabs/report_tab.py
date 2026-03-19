@@ -27,6 +27,13 @@ from llm.threat_modeling_pipeline import (
     build_security_requirement_details,
 )
 
+from llm.evidence_panels import (
+    render_dfd_evidence,
+    render_stride_evidence,
+    render_dread_evidence,
+    render_security_evidence,
+)
+
 
 def get_completed_attack_count(missions, completed_state):
     return sum(
@@ -162,7 +169,7 @@ def render_report_header():
 
 def render_intro_section():
     st.markdown("### 🧾 분석 리포트")
-    st.info(INTRO_TEXT.strip())
+    st.markdown(INTRO_TEXT.strip())
 
 
 def render_mitre_explainer():
@@ -260,7 +267,7 @@ def render_mapping_section(rows):
 
     summary_html = build_mitre_summary_html(rows)
     # 타임라인(~260) + 인사이트 3열(~190) + 연계 안내(~90) + 헤더(~70)
-    components.html(summary_html, height=500, scrolling=False)
+    components.html(summary_html, height=530, scrolling=False)
 
 
 def render_threat_modeling_flow():
@@ -395,7 +402,7 @@ def render_dread_section():
     st.markdown("### 📋 단계별 항목 점수")
     cards_html = build_dread_cards_html()
     # 카드 2열 × 2행, 카드 하나 약 185px + 여백
-    components.html(cards_html, height=420, scrolling=False)
+    components.html(cards_html, height=430, scrolling=False)
 
     st.divider()
 
@@ -478,15 +485,19 @@ def render_threat_modeling_section():
     st.divider()
 
     render_dfd_section()
+    render_dfd_evidence()
     st.divider()
 
     render_stride_section()
+    render_stride_evidence()
     st.divider()
 
     render_dread_section()
+    render_dread_evidence()
     st.divider()
 
     render_security_requirements_section()
+    render_security_evidence()
 
 
 def render_report_tab(missions=None):
